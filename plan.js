@@ -214,7 +214,8 @@
   }
 
   async function applyCode() {
-    let estimates = await getInvoiceEstimates();
+    await getInvoiceEstimates();
+    await refreshCalculations();
     if (isCouponApplied) {
       $("#coupon-error").css("display", "none");
       $("#coupon-success").css("display", "block");
