@@ -10,13 +10,13 @@
   $('.slide').hide();
   setTimeout(function(){$('.slide').show();}, 50);
   // End hotfix for Safari
-  
+
   function showLoader() {
-    $('#loading').css('z-index', '1000');
+    $('#loading').css('display', 'flex');
   }
   
   function hideLoader() {
-    $('#loading').css('z-index', '0');
+    $('#loading').css('display', 'none');
   }
 
   let resp = {};
