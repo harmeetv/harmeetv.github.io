@@ -209,8 +209,10 @@
     let estimates = await getInvoiceEstimates();
     if (estimates) {
       isCouponApplied = true;
+      $("#coupon-error").css("display", "none");
     } else {
       isCouponApplied = false;
+      $("#coupon-error").css("display", "block");
     }
   }
 
