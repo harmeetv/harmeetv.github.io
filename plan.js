@@ -74,7 +74,7 @@
     const totalPriceMonthly = (monthlyTier.tier.find(a => a.starting_unit === 1).price + monthlyTier.tier.find(a => a.starting_unit === 2).price) + (selectedUsers * monthlyTier.tier.find(a => a.starting_unit === 3).price);
     const totalPriceAnnual = (annualTier.tier.find(a => a.starting_unit === 1).price + annualTier.tier.find(a => a.starting_unit === 2).price) + (selectedUsers * annualTier.tier.find(a => a.starting_unit === 3).price);
     const savings = totalPriceMonthly - (totalPriceAnnual/12);
-    return period === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
+    return period === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/monthly' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
   }
 
   function sanitizeUserInput() {
