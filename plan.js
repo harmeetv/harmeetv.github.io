@@ -19,7 +19,9 @@
     $('#loading').css('z-index', '0');
   }
 
-  var resp = {};
+  let resp = {};
+  let isCouponApplied = false;
+
   $('#expand-radio').prop('checked',true);
   $('#launch-additional-users').val(0);
   $('#expand-additional-users').val(0);
@@ -128,9 +130,10 @@
     }
   }
 
-  async function getInvoiceEstimate() {
+  async function getInvoiceEstimates() {
     const { selectedUsers, couponCode, selectedPlan, currency } = getInputData();
     showLoader();
+    let estimates = null;
     try {
       const monthlyPlanId = `${selectedPlan}-monthly-${currency.toLowerCase()}`;
       const annualPlanId = `${selectedPlan}-annual-${currency.toLowerCase()}`;
@@ -146,7 +149,7 @@
         contentType: "application/json",
         dataType: "json"
       });
-      return {
+      estimates = {
         monthlyInvoiceEstimate,
         annualInvoiceEstimate
       }
@@ -155,13 +158,19 @@
     } finally {
       hideLoader();
     }
+    return estimates;
   }
 
   async function refreshCalculations() {
     try {
       sanitizeUserInput();
-      let k = await getInvoiceEstimate();
-      console.log("k", k);
+      // let k = await getInvoiceEstimates();
+      // console.log("k", k);
+      if (isCouponApplied) {
+        console.log("coupon is applied");
+      } else {
+        console.log("coupon is not applied");
+      }
       const isYearly = $('#period-checkbox').is(":checked");
       const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
 
@@ -196,6 +205,15 @@
     }
   }
 
+  async function applyCode() {
+    let estimates = await getInvoiceEstimates();
+    if (estimates) {
+      isCouponApplied = true;
+    } else {
+      isCouponApplied = false;
+    }
+  }
+
   async function refreshPlanDetailsData() {
     const currency = $('#currency-select').val();
     showLoader();
@@ -225,6 +243,7 @@
   $('#launch-additional-users').change(refreshCalculations);
   $('#expand-additional-users').change(refreshCalculations);
   $('#growth-additional-users').change(refreshCalculations);
+  $('#apply-code').click(applyCode);
 
   $('#currency-select').change(refreshPlanDetailsData);
 
