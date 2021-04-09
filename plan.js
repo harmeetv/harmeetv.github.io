@@ -133,15 +133,14 @@
     console.log(planId, selectedUsers, couponCode);
     showLoader();
     try {
-      const { invoiceEstimate } = await $.ajax({
+      const { invoice_estimate } = await $.ajax({
         type: 'GET',
-        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}`,
-        data: JSON.stringify({}),
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
         dataType: "json"
       });
-      console.log("invoiceEstimate", invoiceEstimate);
-      return invoiceEstimate
+      console.log("invoiceEstimate", invoice_estimate);
+      return invoice_estimate
     } catch (error) {
       console.error(error);
     } finally {
@@ -194,7 +193,6 @@
       resp = await $.ajax({
         type: 'GET',
         url: baseUrl + '/v2/plan/details?currency=' + currency,
-        data: JSON.stringify({}),
         contentType: "application/json",
         dataType: "json"
       });
