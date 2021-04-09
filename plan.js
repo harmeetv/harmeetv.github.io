@@ -130,11 +130,12 @@
 
   async function getInvoiceEstimate() {
     const { planId, selectedUsers, couponCode } = getInputData();
+    console.log(planId, selectedUsers, couponCode);
     showLoader();
     try {
       const { invoiceEstimate } = await $.ajax({
         type: 'GET',
-        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${selectedUsers+2}&coupon=${couponCode}`,
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         data: JSON.stringify({}),
         contentType: "application/json",
         dataType: "json"
