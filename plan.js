@@ -21,6 +21,8 @@
 
   let resp = {};
   let isCouponApplied = false;
+  let monthlyInvoiceEstimate = 0;
+  let annualInvoiceEstimate = 0;
 
   $('#expand-radio').prop('checked',true);
   $('#launch-additional-users').val(0);
@@ -73,8 +75,13 @@
     const selectedUsers = selectedPlan === 'launch' ? launchAdditionalUsers : selectedPlan === 'growth' ? growthAdditionalUsers : expandAdditionalUsers;
     const totalPriceMonthly = (monthlyTier.tier.find(a => a.starting_unit === 1).price + monthlyTier.tier.find(a => a.starting_unit === 2).price) + (selectedUsers * monthlyTier.tier.find(a => a.starting_unit === 3).price);
     const totalPriceAnnual = (annualTier.tier.find(a => a.starting_unit === 1).price + annualTier.tier.find(a => a.starting_unit === 2).price) + (selectedUsers * annualTier.tier.find(a => a.starting_unit === 3).price);
-    const savings = totalPriceMonthly - (totalPriceAnnual/12);
-    return period === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/monthly' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
+    let savings;
+    if (isCouponApplied) {
+      savings = monthlyInvoiceEstimate - (annualInvoiceEstimate/12);
+    } else {
+      savings = totalPriceMonthly - (totalPriceAnnual/12);
+    }
+    return period === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/month' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
   }
 
   function sanitizeUserInput() {
@@ -133,32 +140,28 @@
   async function getInvoiceEstimates() {
     const { selectedUsers, couponCode, selectedPlan, currency } = getInputData();
     showLoader();
-    let estimates = null;
     try {
       const monthlyPlanId = `${selectedPlan}-monthly-${currency.toLowerCase()}`;
       const annualPlanId = `${selectedPlan}-annual-${currency.toLowerCase()}`;
-      const { invoice_estimate: monthlyInvoiceEstimate } = await $.ajax({
+      const { invoice_estimate: monthly_invoice_estimate } = await $.ajax({
         type: 'GET',
         url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${monthlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
         dataType: "json"
       });
-      const { invoice_estimate: annualInvoiceEstimate } = await $.ajax({
+      const { invoice_estimate: annual_invoice_estimate } = await $.ajax({
         type: 'GET',
         url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${annualPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
         dataType: "json"
       });
-      estimates = {
-        monthlyInvoiceEstimate,
-        annualInvoiceEstimate
-      }
+      monthlyInvoiceEstimate = monthly_invoice_estimate;
+      annualInvoiceEstimate = annual_invoice_estimate;
     } catch (error) {
       console.error(error);
     } finally {
       hideLoader();
     }
-    return estimates;
   }
 
   async function refreshCalculations() {
@@ -197,7 +200,11 @@
       $('#launch-additional-user-price').text(currencyFormatter(isYearly ? launchAdditionalPrice/12 : launchAdditionalPrice) + " / user");
       $('#expand-additional-user-price').text(currencyFormatter(isYearly ? expandAdditionalPrice/12 : expandAdditionalPrice) + " / user");
       $('#growth-additional-user-price').text(currencyFormatter(isYearly ? growthAdditionalPrice/12 : growthAdditionalPrice) + " / user");
-      $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
+      if (isCouponApplied) {
+        $('#total-price').text(currencyFormatter(isYearly ? annualInvoiceEstimate/12 : monthlyInvoiceEstimate) + "/month");
+      } else {
+        $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
+      }
       $('#plan-summary-text').text(summaryText);
       $('#recommend-yearly').text(getSavingText());
     } catch(err) {
@@ -254,7 +261,12 @@
   $('#coupon-code-2').change(refreshCalculations);
 
   $('#lets-begin').click(function() {
-    window.location.href = "/register?plan_id=" + selectedPlan + '&no_of_additional_users=' + selectedUsers;
+    const { selectedPlan, selectedUsers, couponCode } = getInputData();
+    let registerUrl = "/register?plan_id=" + selectedPlan + '&no_of_additional_users=' + selectedUsers;
+    if (isCouponApplied) {
+      registerUrl += "&coupon=" + couponCode;
+    }
+    window.location.href = registerUrl;
   });
     
     
