@@ -1,4 +1,4 @@
-<script>
+
   const baseUrl = "https://apiv2.channelforcestage.com"
   
   $(document).ready(function() {
@@ -226,4 +226,4 @@
     
   });
 
-</script>
+
