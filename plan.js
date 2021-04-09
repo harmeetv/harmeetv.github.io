@@ -203,7 +203,7 @@
       $('#expand-additional-user-price').text(currencyFormatter(isYearly ? expandAdditionalPrice/12 : expandAdditionalPrice) + " / user");
       $('#growth-additional-user-price').text(currencyFormatter(isYearly ? growthAdditionalPrice/12 : growthAdditionalPrice) + " / user");
       if (isCouponApplied) {
-        $('#total-price').text(currencyFormatter(isYearly ? annualInvoiceEstimate/12 : monthlyInvoiceEstimate) + "/month");
+        $('#total-price').html(`<span style="text-decoration: line-through; font-size: 65%; margin-right: 4px;">${currencyFormatter(isYearly ? totalPrice/12 : totalPrice)}</span>${currencyFormatter(isYearly ? annualInvoiceEstimate/12 : monthlyInvoiceEstimate)}/month`);
       } else {
         $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
       }
