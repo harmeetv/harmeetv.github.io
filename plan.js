@@ -129,18 +129,27 @@
   }
 
   async function getInvoiceEstimate() {
-    const { planId, selectedUsers, couponCode } = getInputData();
-    console.log(planId, selectedUsers, couponCode);
+    const { planId, selectedUsers, couponCode, selectedPlan, period, currency } = getInputData();
     showLoader();
     try {
-      const { invoice_estimate } = await $.ajax({
+      const monthlyPlanId = `${selectedPlan}-monthly-${currency.toLowerCase()}`;
+      const annualPlanId = `${selectedPlan}-annual-${currency.toLowerCase()}`;
+      const { invoice_estimate: monthlyInvoiceEstimate } = await $.ajax({
         type: 'GET',
-        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${monthlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
         dataType: "json"
       });
-      console.log("invoiceEstimate", invoice_estimate);
-      return invoice_estimate
+      const { invoice_estimate: annualInvoiceEstimate } = await $.ajax({
+        type: 'GET',
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${annualPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
+        contentType: "application/json",
+        dataType: "json"
+      });
+      return {
+        monthlyInvoiceEstimate,
+        annualInvoiceEstimate
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -150,37 +159,38 @@
 
   async function refreshCalculations() {
     try {
-    sanitizeUserInput();
-    await getInvoiceEstimate()
-    const isYearly = $('#period-checkbox').is(":checked");
-    const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
+      sanitizeUserInput();
+      let k = await getInvoiceEstimate();
+      console.log("k", k);
+      const isYearly = $('#period-checkbox').is(":checked");
+      const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
 
-    const launchBasePrice = getBasePrice('launch');
-    const expandBasePrice = getBasePrice('expand');
-    const growthBasePrice = getBasePrice('growth');
+      const launchBasePrice = getBasePrice('launch');
+      const expandBasePrice = getBasePrice('expand');
+      const growthBasePrice = getBasePrice('growth');
 
-    const launchAdditionalPrice = getAdditionalUserPrice('launch');
-    const expandAdditionalPrice = getAdditionalUserPrice('expand');
-    const growthAdditionalPrice = getAdditionalUserPrice('growth');
+      const launchAdditionalPrice = getAdditionalUserPrice('launch');
+      const expandAdditionalPrice = getAdditionalUserPrice('expand');
+      const growthAdditionalPrice = getAdditionalUserPrice('growth');
 
-    const launchAdditionalUsers = $('#launch-additional-users').val() || 0 ;
-    const expandAdditionalUsers = $('#expand-additional-users').val() || 0 ;
-    const growthAdditionalUsers = $('#growth-additional-users').val() || 0 ;
+      const launchAdditionalUsers = $('#launch-additional-users').val() || 0 ;
+      const expandAdditionalUsers = $('#expand-additional-users').val() || 0 ;
+      const growthAdditionalUsers = $('#growth-additional-users').val() || 0 ;
 
-    const totalPrice = selectedPlan === 'launch' ? launchBasePrice + (launchAdditionalUsers * launchAdditionalPrice) : selectedPlan === 'growth' ? growthBasePrice + (growthAdditionalUsers * growthAdditionalPrice) : expandBasePrice + (expandAdditionalUsers * expandAdditionalPrice);
+      const totalPrice = selectedPlan === 'launch' ? launchBasePrice + (launchAdditionalUsers * launchAdditionalPrice) : selectedPlan === 'growth' ? growthBasePrice + (growthAdditionalUsers * growthAdditionalPrice) : expandBasePrice + (expandAdditionalUsers * expandAdditionalPrice);
 
-    const additionalUsers = selectedPlan === 'launch' ? launchAdditionalUsers : selectedPlan === 'growth' ? growthAdditionalUsers : expandAdditionalUsers;
-    const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
+      const additionalUsers = selectedPlan === 'launch' ? launchAdditionalUsers : selectedPlan === 'growth' ? growthAdditionalUsers : expandAdditionalUsers;
+      const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
 
-    $('#launch-base-price').text(currencyFormatter(isYearly ? launchBasePrice/12 : launchBasePrice) + "/month" );
-    $('#expand-base-price').text(currencyFormatter(isYearly ? expandBasePrice/12 : expandBasePrice) + "/month" );
-    $('#growth-base-price').text(currencyFormatter(isYearly ? growthBasePrice/12 : growthBasePrice) + "/month" );
-    $('#launch-additional-user-price').text(currencyFormatter(isYearly ? launchAdditionalPrice/12 : launchAdditionalPrice) + " / user");
-    $('#expand-additional-user-price').text(currencyFormatter(isYearly ? expandAdditionalPrice/12 : expandAdditionalPrice) + " / user");
-    $('#growth-additional-user-price').text(currencyFormatter(isYearly ? growthAdditionalPrice/12 : growthAdditionalPrice) + " / user");
-    $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
-    $('#plan-summary-text').text(summaryText);
-    $('#recommend-yearly').text(getSavingText());
+      $('#launch-base-price').text(currencyFormatter(isYearly ? launchBasePrice/12 : launchBasePrice) + "/month" );
+      $('#expand-base-price').text(currencyFormatter(isYearly ? expandBasePrice/12 : expandBasePrice) + "/month" );
+      $('#growth-base-price').text(currencyFormatter(isYearly ? growthBasePrice/12 : growthBasePrice) + "/month" );
+      $('#launch-additional-user-price').text(currencyFormatter(isYearly ? launchAdditionalPrice/12 : launchAdditionalPrice) + " / user");
+      $('#expand-additional-user-price').text(currencyFormatter(isYearly ? expandAdditionalPrice/12 : expandAdditionalPrice) + " / user");
+      $('#growth-additional-user-price').text(currencyFormatter(isYearly ? growthAdditionalPrice/12 : growthAdditionalPrice) + " / user");
+      $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
+      $('#plan-summary-text').text(summaryText);
+      $('#recommend-yearly').text(getSavingText());
     } catch(err) {
       console.log("err", err);
     }
@@ -196,7 +206,7 @@
         contentType: "application/json",
         dataType: "json"
       });
-      refreshCalculations();
+      await refreshCalculations();
       updateDescriptions();
     } catch (error) {
       console.error(error);
