@@ -1,4 +1,4 @@
-
+<script>
   const baseUrl = "https://apiv2.channelforcestage.com"
   
   $(document).ready(function() {
@@ -129,7 +129,7 @@
   }
 
   async function getInvoiceEstimate() {
-    const { selectedPlan, currency } = getInputData();
+    const { planId, currency } = getInputData();
     showLoader();
     try {
       const { invoiceEstimate } = await $.ajax({
@@ -226,4 +226,4 @@
     
   });
 
-
+</script>
