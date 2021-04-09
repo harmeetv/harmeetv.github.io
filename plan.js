@@ -210,9 +210,11 @@
     if (estimates) {
       isCouponApplied = true;
       $("#coupon-error").css("display", "none");
+      $("#coupon-success").css("display", "block");
     } else {
       isCouponApplied = false;
       $("#coupon-error").css("display", "block");
+      $("#coupon-success").css("display", "none");
     }
   }
 
