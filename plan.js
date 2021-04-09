@@ -135,7 +135,7 @@
     try {
       const { invoiceEstimate } = await $.ajax({
         type: 'GET',
-        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${planId}&quantity=${+selectedUsers + 2}`,
         data: JSON.stringify({}),
         contentType: "application/json",
         dataType: "json"
