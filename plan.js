@@ -129,7 +129,7 @@
   }
 
   async function getInvoiceEstimate() {
-    const { planId, selectedUsers, couponCode, selectedPlan, period, currency } = getInputData();
+    const { selectedUsers, couponCode, selectedPlan, currency } = getInputData();
     showLoader();
     try {
       const monthlyPlanId = `${selectedPlan}-monthly-${currency.toLowerCase()}`;
@@ -227,6 +227,8 @@
   $('#growth-additional-users').change(refreshCalculations);
 
   $('#currency-select').change(refreshPlanDetailsData);
+
+  $('#coupon-code-2').change(refreshCalculations);
 
   $('#lets-begin').click(function() {
     window.location.href = "/register?plan_id=" + selectedPlan + '&no_of_additional_users=' + selectedUsers;
