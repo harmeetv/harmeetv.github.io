@@ -168,13 +168,8 @@
   async function refreshCalculations() {
     try {
       sanitizeUserInput();
-      // let k = await getInvoiceEstimates();
-      // console.log("k", k);
       if (isCouponApplied) {
         await getInvoiceEstimates();
-        console.log("coupon is applied");
-      } else {
-        console.log("coupon is not applied");
       }
       const isYearly = $('#period-checkbox').is(":checked");
       const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
