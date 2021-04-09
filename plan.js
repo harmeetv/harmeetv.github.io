@@ -157,8 +157,9 @@
       });
       monthlyInvoiceEstimate = monthly_invoice_estimate;
       annualInvoiceEstimate = annual_invoice_estimate;
+      isCouponApplied = true;
     } catch (error) {
-      console.error(error);
+      isCouponApplied = false;
     } finally {
       hideLoader();
     }
@@ -214,12 +215,10 @@
 
   async function applyCode() {
     let estimates = await getInvoiceEstimates();
-    if (estimates) {
-      isCouponApplied = true;
+    if (isCouponApplied) {
       $("#coupon-error").css("display", "none");
       $("#coupon-success").css("display", "block");
     } else {
-      isCouponApplied = false;
       $("#coupon-error").css("display", "block");
       $("#coupon-success").css("display", "none");
     }
