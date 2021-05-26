@@ -264,6 +264,11 @@
   refreshPlanDetailsData();
 
   // $('#period-checkbox').change(refreshCalculations);
+  function changePlanPeriod(e) {
+    activePeriod = e.target.innerText.toLowerCase();
+    refreshCalculations();
+  }
+  $('.plan-button').click(changePlanPeriod);
   $('#launch-radio').change(refreshCalculations);
   $('#expand-radio').change(refreshCalculations);
   $('#growth-radio').change(refreshCalculations);
