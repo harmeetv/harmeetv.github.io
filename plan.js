@@ -23,6 +23,7 @@
   let resp = {};
   let isCouponApplied = false;
   let monthlyInvoiceEstimate = 0;
+  let quarterlyInvoiceEstimate = 0;
   let annualInvoiceEstimate = 0;
   let activePeriod = 'monthly';
 
@@ -158,8 +159,15 @@
     showLoader();
     try {
       const monthlyPlanId = `${selectedPlan}-monthly-${currency.toLowerCase()}`;
+      const quarterlyPlanId = `${selectedPlan}-quarterly-${currency.toLowerCase()}`;
       const annualPlanId = `${selectedPlan}-annual-${currency.toLowerCase()}`;
       const { invoice_estimate: monthly_invoice_estimate } = await $.ajax({
+        type: 'GET',
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${monthlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
+        contentType: "application/json",
+        dataType: "json"
+      });
+      const { invoice_estimate: quarterly_invoice_estimate } = await $.ajax({
         type: 'GET',
         url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${monthlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
@@ -172,6 +180,7 @@
         dataType: "json"
       });
       monthlyInvoiceEstimate = monthly_invoice_estimate;
+      quarterlyInvoiceEstimate = quarterly_invoice_estimate;
       annualInvoiceEstimate = annual_invoice_estimate;
       isCouponApplied = true;
     } catch (error) {
@@ -208,24 +217,27 @@
       // const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
       const summaryText = (selectedPlan === 'launch' ? 'Plan: Launch' : selectedPlan === 'growth' ? 'Plan: Growth' : 'Plan: Expand');
 
-      const getMonthyBasePrice = (basePrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
-      const getMonthlyAdditionalPrice = (additionalPrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
-      $('#launch-base-price').text(currencyFormatter(getMonthyBasePrice(launchBasePrice)) + "/month" );
-      $('#expand-base-price').text(currencyFormatter(getMonthyBasePrice(expandBasePrice)) + "/month" );
-      $('#growth-base-price').text(currencyFormatter(getMonthyBasePrice(growthBasePrice)) + "/month" );
-      $('#launch-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(launchAdditionalPrice)) + " / user");
-      $('#expand-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(expandAdditionalPrice)) + " / user");
-      $('#growth-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(growthAdditionalPrice)) + " / user");
+      const getMonthlyPrice = (price) => (activePeriod==="annual" ? price/12 : (activePeriod==="quarterly" ? price/3 : price));
+      const getMonthlyInvoiceEstimate = () => (activePeriod==="annual" ? annualInvoiceEstimate/12 : (activePeriod==="quarterly" ? quarterlyInvoiceEstimate/3 : monthlyInvoiceEstimate))
+      const getTotalCostTitle = () => (activePeriod==="annual" ? "Monthly Cost (Billed Annually)" : (activePeriod==="quarterly" ? "Monthly Cost (Billed Quarterly)" : "Monthly Cost"));
+      
+      // const getMonthyBasePrice = (basePrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
+      // const getMonthlyAdditionalPrice = (additionalPrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
+      $('#launch-base-price').text(currencyFormatter(getMonthlyPrice(launchBasePrice)) + "/month" );
+      $('#expand-base-price').text(currencyFormatter(getMonthlyPrice(expandBasePrice)) + "/month" );
+      $('#growth-base-price').text(currencyFormatter(getMonthlyPrice(growthBasePrice)) + "/month" );
+      $('#launch-additional-user-price').text(currencyFormatter(getMonthlyPrice(launchAdditionalPrice)) + " / user");
+      $('#expand-additional-user-price').text(currencyFormatter(getMonthlyPrice(expandAdditionalPrice)) + " / user");
+      $('#growth-additional-user-price').text(currencyFormatter(getMonthlyPrice(growthAdditionalPrice)) + " / user");
       if (isCouponApplied) {
-        $('#total-price').html(`<span style="text-decoration: line-through; font-size: 65%; margin-right: 4px;">${currencyFormatter(isYearly ? totalPrice/12 : totalPrice)}</span>${currencyFormatter(isYearly ? annualInvoiceEstimate/12 : monthlyInvoiceEstimate)}/month`);
+        $('#total-price').html(`<span style="text-decoration: line-through; font-size: 65%; margin-right: 4px;">${currencyFormatter(getMonthlyPrice(totalPrice))}</span>${currencyFormatter(getMonthlyInvoiceEstimate())}/month`);
       } else {
-        $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
+        $('#total-price').text(currencyFormatter(getMonthlyPrice(totalPrice)) + "/month");
       }
       $('#plan-summary-text').text(summaryText);
       // $('#recommend-yearly').text(getSavingText());
       $('#total-seats').text(`Total number of seats: ${2 + +additionalUsers}`);
-      const totalCostTitle = isYearly ? "Monthly Cost (Billed Annually)" : "Monthly Cost";
-      $($('.total-cost-title')[0]).text(totalCostTitle);
+      $($('.total-cost-title')[0]).text(getTotalCostTitle());
     } catch(err) {
       console.log("err", err);
     }
