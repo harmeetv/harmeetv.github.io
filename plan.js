@@ -169,7 +169,7 @@
       });
       const { invoice_estimate: quarterly_invoice_estimate } = await $.ajax({
         type: 'GET',
-        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${monthlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
+        url: `${baseUrl}/v2/companies/invoice/estimate?plan_id=${quarterlyPlanId}&quantity=${+selectedUsers + 2}&coupon=${couponCode}`,
         contentType: "application/json",
         dataType: "json"
       });
