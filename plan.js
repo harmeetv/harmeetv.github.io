@@ -134,11 +134,8 @@
   
   function updateDescriptions() {
     const planFeatureBlockTemplate = `<div class="plan-feature-block">
-      <div class="plan-bullet-image-wrapper">
-        <img src="https://assets.website-files.com/5d9c347f1416aefa5128c8c3/6062f350c076ba4bdf9424cb_tick-plan.svg" loading="lazy" width="16" alt="">
-      </div>
       <div class="plan-feature-text-wrapper">
-        <div>{{featureName}}</div>
+        <div><img src="https://assets.website-files.com/5d9c347f1416aefa5128c8c3/6062f350c076ba4bdf9424cb_tick-plan.svg" loading="lazy" width="16" alt="">{{featureName}}</div>
       </div>
     </div>`;
     for (let plan of resp.data) {
