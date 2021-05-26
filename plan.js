@@ -266,6 +266,8 @@
   // $('#period-checkbox').change(refreshCalculations);
   function changePlanPeriod(e) {
     activePeriod = e.target.innerText.toLowerCase();
+    $(".plan-button").removeClass('active-period');
+    $(this).addClass('active-period');
     refreshCalculations();
   }
   $('.plan-button').click(changePlanPeriod);
