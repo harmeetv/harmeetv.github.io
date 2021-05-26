@@ -2,7 +2,7 @@
   
   $(document).ready(function() {
   
-  $(".plan-button.monthlly").addClass('active-period')
+  $(".plan-button.monthly").addClass('active-period')
     
   // unbind any form submitting action from webflow
   $(document).off('submit');
