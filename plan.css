@@ -1,0 +1,8 @@
+.plan-feature-block {
+    display: flex;
+    text-align: left;
+    margin-bottom: 8px;
+}
+.plan-features {
+    padding: 20px 6px 0 6px;
+}
