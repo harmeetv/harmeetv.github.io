@@ -1,5 +1,4 @@
-
-  const baseUrl = "https://apiv2.channelforcestage.com"
+  const baseUrl = window.location.host==="www.zomentum.com" ? "https://api.zomentum.com" : "https://apiv2.channelforcestage.com"
   
   $(document).ready(function() {
   
@@ -24,7 +23,21 @@
   let monthlyInvoiceEstimate = 0;
   let annualInvoiceEstimate = 0;
 
+  const onChangePlan = () => {
+      let selectedPlan = $('input[type=radio][name="radio"]:checked').val();
+      $("#launch-additional-users").attr('disabled', true);
+      $("#expand-additional-users").attr('disabled', true);
+      $("#growth-additional-users").attr('disabled', true);
+      $(`#${selectedPlan}-additional-users`).attr('disabled', false);
+  }
+
+  $('input[type=radio][name=radio]').change(onChangePlan);
+
   $('#expand-radio').prop('checked',true);
+  setTimeout(() => {
+    onChangePlan();
+  }, 0);
+
   $('#launch-additional-users').val(0);
   $('#expand-additional-users').val(0);
   $('#growth-additional-users').val(0);
@@ -189,7 +202,8 @@
       const totalPrice = selectedPlan === 'launch' ? launchBasePrice + (launchAdditionalUsers * launchAdditionalPrice) : selectedPlan === 'growth' ? growthBasePrice + (growthAdditionalUsers * growthAdditionalPrice) : expandBasePrice + (expandAdditionalUsers * expandAdditionalPrice);
 
       const additionalUsers = selectedPlan === 'launch' ? launchAdditionalUsers : selectedPlan === 'growth' ? growthAdditionalUsers : expandAdditionalUsers;
-      const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
+      // const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
+      const summaryText = (selectedPlan === 'launch' ? 'Plan: Launch' : selectedPlan === 'growth' ? 'Plan: Growth' : 'Plan: Expand');
 
       $('#launch-base-price').text(currencyFormatter(isYearly ? launchBasePrice/12 : launchBasePrice) + "/month" );
       $('#expand-base-price').text(currencyFormatter(isYearly ? expandBasePrice/12 : expandBasePrice) + "/month" );
@@ -204,6 +218,9 @@
       }
       $('#plan-summary-text').text(summaryText);
       $('#recommend-yearly').text(getSavingText());
+      $('#total-seats').text(`Total number of seats: ${2 + +additionalUsers}`);
+      const totalCostTitle = isYearly ? "Monthly Cost (Billed Annually)" : "Monthly Cost";
+      $($('.total-cost-title')[0]).text(totalCostTitle);
     } catch(err) {
       console.log("err", err);
     }
@@ -257,14 +274,23 @@
   $('#coupon-code-2').change(refreshCalculations);
 
   $('#lets-begin').click(function() {
-    const { selectedPlan, selectedUsers, couponCode } = getInputData();
-    let registerUrl = "/register?plan_id=" + selectedPlan + '&no_of_additional_users=' + selectedUsers;
+    const { planId, selectedUsers, couponCode } = getInputData();
+    let registerUrl = "/register?plan_id=" + planId + '&no_of_additional_users=' + selectedUsers;
     if (isCouponApplied) {
       registerUrl += "&coupon=" + couponCode;
+    }
+    if (window.location.pathname==="/achab-uk") {
+      registerUrl += "&parent_account=achab_uk";
+    }
+    else if (window.location.pathname==="/achab-it") {
+      registerUrl += "&parent_account=achab_it";
+    }
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.has('tr_code')) {
+      registerUrl += `&tr_code=${queryParams.get('tr_code')}`;
     }
     window.location.href = registerUrl;
   });
     
     
   });
-
