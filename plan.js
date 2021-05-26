@@ -24,6 +24,7 @@
   let isCouponApplied = false;
   let monthlyInvoiceEstimate = 0;
   let annualInvoiceEstimate = 0;
+  let activePeriod = 'monthly';
 
   const onChangePlan = () => {
       let selectedPlan = $('input[type=radio][name="radio"]:checked').val();
@@ -63,23 +64,23 @@
   }
 
   function getBasePrice(plan) {
-    const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
+    // const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
     const targetPlan = resp.data.find(a => a.name === plan);
-    const targetTier = targetPlan.plan_tiers.find(a => a.period === period);
+    const targetTier = targetPlan.plan_tiers.find(a => a.period === activePeriod);
     const basePlanPrice =  targetTier.tier.find(a => a.starting_unit === 1).price + targetTier.tier.find(a => a.starting_unit === 2).price;
     return basePlanPrice;
   }
 
   function getAdditionalUserPrice(plan) {
-    const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
+    // const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
     const targetPlan = resp.data.find(a => a.name === plan);
-    const targetTier = targetPlan.plan_tiers.find(a => a.period === period);
+    const targetTier = targetPlan.plan_tiers.find(a => a.period === activePeriod);
     const additionalPrice = targetTier.tier.find(a => a.starting_unit === 3).price;
     return additionalPrice;
   }
 
   function getSavingText() {
-    const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
+    // const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
     const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
     const targetPlan = resp.data.find(a => a.name === selectedPlan);
     const monthlyTier = targetPlan.plan_tiers.find(a => a.period === 'monthly');
@@ -96,7 +97,7 @@
     } else {
       savings = totalPriceMonthly - (totalPriceAnnual/12);
     }
-    return period === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/month' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
+    return activePeriod === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/month' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
   }
 
   function sanitizeUserInput() {
@@ -122,14 +123,14 @@
     const expandAdditionalUsers = $('#expand-additional-users').val() || 0 ;
     const growthAdditionalUsers = $('#growth-additional-users').val() || 0 ;
     const selectedUsers = selectedPlan === 'launch' ? launchAdditionalUsers : selectedPlan === 'growth' ? growthAdditionalUsers : expandAdditionalUsers;
-    const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
-    const planId = selectedPlan + "-" + period + "-" + currency.toLowerCase();
+    // const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
+    const planId = selectedPlan + "-" + activePeriod + "-" + currency.toLowerCase();
     return {
       couponCode,
       selectedPlan,
       currency,
       selectedUsers,
-      period,
+      period: activePeriod,
       planId
     }
   }
@@ -262,7 +263,7 @@
 
   refreshPlanDetailsData();
 
-  $('#period-checkbox').change(refreshCalculations);
+  // $('#period-checkbox').change(refreshCalculations);
   $('#launch-radio').change(refreshCalculations);
   $('#expand-radio').change(refreshCalculations);
   $('#growth-radio').change(refreshCalculations);
