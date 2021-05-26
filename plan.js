@@ -79,7 +79,7 @@
     return additionalPrice;
   }
 
-  function getSavingText() {
+  /*function getSavingText() {
     // const period = $('#period-checkbox').is(":checked") ? "annual" : "monthly";
     const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
     const targetPlan = resp.data.find(a => a.name === selectedPlan);
@@ -98,7 +98,7 @@
       savings = totalPriceMonthly - (totalPriceAnnual/12);
     }
     return activePeriod === 'annual' ? 'Saving additonal ' + currencyFormatter(savings) + '/month' : 'Switch to yearly and save additional ' + currencyFormatter(savings) +  '/month';
-  }
+  }*/
 
   function sanitizeUserInput() {
     if ($('#launch-additional-users').val() < 0 ) {
@@ -187,7 +187,7 @@
       if (isCouponApplied) {
         await getInvoiceEstimates();
       }
-      const isYearly = $('#period-checkbox').is(":checked");
+      // const isYearly = $('#period-checkbox').is(":checked");
       const selectedPlan = $('#launch-radio').is(':checked') ? 'launch' : $('#growth-radio').is(':checked') ? 'growth' : 'expand';
 
       const launchBasePrice = getBasePrice('launch');
@@ -208,19 +208,21 @@
       // const summaryText = (selectedPlan === 'launch' ? 'Launch' : selectedPlan === 'growth' ? 'Growth' : 'Expand') + (additionalUsers && additionalUsers > 0 ? ' | ' + additionalUsers + ' additional users' : '');
       const summaryText = (selectedPlan === 'launch' ? 'Plan: Launch' : selectedPlan === 'growth' ? 'Plan: Growth' : 'Plan: Expand');
 
-      $('#launch-base-price').text(currencyFormatter(isYearly ? launchBasePrice/12 : launchBasePrice) + "/month" );
-      $('#expand-base-price').text(currencyFormatter(isYearly ? expandBasePrice/12 : expandBasePrice) + "/month" );
-      $('#growth-base-price').text(currencyFormatter(isYearly ? growthBasePrice/12 : growthBasePrice) + "/month" );
-      $('#launch-additional-user-price').text(currencyFormatter(isYearly ? launchAdditionalPrice/12 : launchAdditionalPrice) + " / user");
-      $('#expand-additional-user-price').text(currencyFormatter(isYearly ? expandAdditionalPrice/12 : expandAdditionalPrice) + " / user");
-      $('#growth-additional-user-price').text(currencyFormatter(isYearly ? growthAdditionalPrice/12 : growthAdditionalPrice) + " / user");
+      const getMonthyBasePrice = (basePrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
+      const getMonthlyAdditionalPrice = (additionalPrice) => (activePeriod==="annual" ? launchBasePrice/12 : (activePeriod==="quarterly" ? launchBasePrice/3 : launchBasePrice));
+      $('#launch-base-price').text(currencyFormatter(getMonthyBasePrice(launchBasePrice)) + "/month" );
+      $('#expand-base-price').text(currencyFormatter(getMonthyBasePrice(expandBasePrice)) + "/month" );
+      $('#growth-base-price').text(currencyFormatter(getMonthyBasePrice(growthBasePrice)) + "/month" );
+      $('#launch-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(launchAdditionalPrice)) + " / user");
+      $('#expand-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(expandAdditionalPrice)) + " / user");
+      $('#growth-additional-user-price').text(currencyFormatter(getMonthlyAdditionalPrice(growthAdditionalPrice)) + " / user");
       if (isCouponApplied) {
         $('#total-price').html(`<span style="text-decoration: line-through; font-size: 65%; margin-right: 4px;">${currencyFormatter(isYearly ? totalPrice/12 : totalPrice)}</span>${currencyFormatter(isYearly ? annualInvoiceEstimate/12 : monthlyInvoiceEstimate)}/month`);
       } else {
         $('#total-price').text(currencyFormatter(isYearly ? totalPrice/12 : totalPrice) + "/month");
       }
       $('#plan-summary-text').text(summaryText);
-      $('#recommend-yearly').text(getSavingText());
+      // $('#recommend-yearly').text(getSavingText());
       $('#total-seats').text(`Total number of seats: ${2 + +additionalUsers}`);
       const totalCostTitle = isYearly ? "Monthly Cost (Billed Annually)" : "Monthly Cost";
       $($('.total-cost-title')[0]).text(totalCostTitle);
